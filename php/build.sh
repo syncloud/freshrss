@@ -4,18 +4,29 @@ DIR=$( cd "$( dirname "$0" )" && pwd )
 cd ${DIR}
 
 BUILD_DIR=${DIR}/../build/snap/php
-
-docker ps -a -q --filter ancestor=freshrss-php:syncloud --format="{{.ID}}" | xargs -r docker stop | xargs -r docker rm || true
-docker rmi freshrss-php:syncloud || true
-docker build -t freshrss-php:syncloud .
-docker create --name=freshrss-php freshrss-php:syncloud
-
 mkdir -p ${BUILD_DIR}
-cd ${BUILD_DIR}
-docker export freshrss-php -o php.tar
-tar xf php.tar
-rm -rf php.tar
-docker rm freshrss-php
+
+apt-get update
+apt-get install -y --no-install-recommends \
+    libgmp-dev \
+    libicu-dev \
+    libzip-dev \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev
+
+docker-php-ext-configure gd --with-freetype --with-jpeg
+docker-php-ext-install -j"$(nproc)" \
+    gmp \
+    intl \
+    zip \
+    gd \
+    exif \
+    opcache
+
+cp -r /usr ${BUILD_DIR}
+cp -r /lib ${BUILD_DIR}
+cp -r /bin ${BUILD_DIR}
 
 mkdir -p ${BUILD_DIR}/lib/php/extensions
 mv ${BUILD_DIR}/usr/local/lib/php/extensions/*/*.so ${BUILD_DIR}/lib/php/extensions

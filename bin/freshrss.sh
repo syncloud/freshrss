@@ -1,6 +1,8 @@
 #!/bin/bash -e
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd .. && pwd )
+export SNAP=/snap/freshrss/current
+export SNAP_DATA=/var/snap/freshrss/current
+export SNAP_COMMON=/var/snap/freshrss/common
 . $SNAP_DATA/config/env
 export HOME=$SNAP_DATA
-cd $DIR/freshrss
-exec $DIR/php/bin/php.sh "$@"
+cd $SNAP/freshrss
+exec $SNAP/php/bin/php.sh "$@"

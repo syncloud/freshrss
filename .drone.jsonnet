@@ -5,7 +5,7 @@ local nginx = '1.29.3-alpine3.22';
 local python = '3.12-slim-bookworm';
 local publisher_image = 'syncloud/store-publisher:stable-291';
 local platform = '26.04.10';
-local dind = '27-dind';
+local php = '8.3-fpm-bookworm';
 local distros = ['bookworm', 'buster'];
 local distro_default = 'bookworm';
 local arch = 'amd64';
@@ -39,12 +39,9 @@ local platform_image(distro) =
     },
     {
       name: 'php',
-      image: 'docker:' + dind,
+      image: 'php:' + php,
       commands: [
         './php/build.sh',
-      ],
-      volumes: [
-        { name: 'dockersock', path: '/var/run' },
       ],
     },
     {
@@ -127,14 +124,6 @@ local platform_image(distro) =
   },
   services: [
     {
-      name: 'docker',
-      image: 'docker:' + dind,
-      privileged: true,
-      volumes: [
-        { name: 'dockersock', path: '/var/run' },
-      ],
-    },
-    {
       name: name + '.' + distro_default + '.com',
       image: platform_image(distro_default),
       privileged: true,
@@ -147,6 +136,5 @@ local platform_image(distro) =
   volumes: [
     { name: 'dbus', host: { path: '/var/run/dbus' } },
     { name: 'dev', host: { path: '/dev' } },
-    { name: 'dockersock', temp: {} },
   ],
 }]
