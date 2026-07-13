@@ -95,7 +95,7 @@ local platform_image(distro) =
       name: 'publish',
       image: publisher_image,
       environment: {
-        SYNCLOUD_TOKEN: { from_secret: 'SYNCLOUD_TOKEN' },
+        SYNCLOUD_TOKEN: { from_secret: 'syncloud_token' },
       },
       command: ['snap', '-c', '${DRONE_BRANCH}'],
       when: {
