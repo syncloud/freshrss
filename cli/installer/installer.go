@@ -130,7 +130,14 @@ func (i *Installer) StorageChange() error {
 		return err
 	}
 
-	err = linux.CreateMissingDirs(path.Join(storageDir, "data"))
+	dataPath := path.Join(storageDir, "data")
+	err = linux.CreateMissingDirs(
+		dataPath,
+		path.Join(dataPath, "cache"),
+		path.Join(dataPath, "users"),
+		path.Join(dataPath, "favicons"),
+		path.Join(dataPath, "tokens"),
+	)
 	if err != nil {
 		return err
 	}
