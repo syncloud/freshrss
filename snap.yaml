@@ -1,0 +1,47 @@
+name: freshrss
+summary: FreshRSS
+description: A free, self-hostable RSS and Atom feed aggregator
+grade: stable
+
+apps:
+  php-fpm:
+    command: bin/service.php-fpm.sh
+    daemon: simple
+    user: freshrss
+    restart-condition: always
+    restart-delay: 10s
+    start-timeout: 600s
+
+  nginx:
+    command: bin/service.nginx.sh
+    daemon: simple
+    user: freshrss
+    restart-condition: always
+    restart-delay: 10s
+    start-timeout: 600s
+
+  cron:
+    command: bin/service.cron.sh
+    daemon: simple
+    user: freshrss
+    restart-condition: always
+    restart-delay: 10s
+    start-timeout: 600s
+
+  cli:
+    command: bin/cli
+
+  storage-change:
+    command: bin/cli storage-change
+
+  access-change:
+    command: bin/cli access-change
+
+  backup-pre-stop:
+    command: bin/cli backup-pre-stop
+
+  restore-pre-start:
+    command: bin/cli restore-pre-start
+
+  restore-post-start:
+    command: bin/cli restore-post-start
