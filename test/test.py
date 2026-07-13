@@ -54,12 +54,6 @@ def test_index(app_domain):
     wait_for_rest(requests.session(), "https://{0}".format(app_domain), 200, 20)
 
 
-def test_login_page(app_domain):
-    response = requests.get('https://{0}/'.format(app_domain), verify=False)
-    assert response.status_code == 200, response.text
-    assert 'FreshRSS' in response.text, response.text
-
-
 def test_storage_change_event(device):
     device.run_ssh('snap run freshrss.storage-change > {0}/storage-change.log'.format(TMP_DIR))
 

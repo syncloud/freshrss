@@ -11,3 +11,4 @@ CGO_ENABLED=0 go build -o ${HOOKS_DIR}/configure ./cmd/configure
 CGO_ENABLED=0 go build -o ${HOOKS_DIR}/pre-refresh ./cmd/pre-refresh
 CGO_ENABLED=0 go build -o ${HOOKS_DIR}/post-refresh ./cmd/post-refresh
 CGO_ENABLED=0 go build -o ${BIN_DIR}/cli ./cmd/cli
+CGO_ENABLED=0 go build -ldflags "-s -w" -o ${BIN_DIR}/cron ./cmd/cron

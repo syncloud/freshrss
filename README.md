@@ -2,31 +2,17 @@
 
 [FreshRSS](https://freshrss.org) packaged as a Syncloud app — a free, self-hostable RSS and Atom feed aggregator.
 
-## Layout
-
-- `snap.yaml` — snap metadata (root, modern shape)
-- `freshrss/build.sh` — vendors the upstream FreshRSS release
-- `php/` — bundled PHP-FPM runtime (Docker export + `ld-linux` loader wrapper)
-- `nginx/` — bundled nginx (unix-socket reverse proxy)
-- `cli/` — Go + Cobra installer hooks (`install`, `configure`, refresh, backup/restore)
-- `config/` — templated `nginx.conf`, `php-fpm.conf`, `php.ini`, `env`
-- `bin/` — service launchers and the FreshRSS CLI wrapper
-- `test/` — pytest integration tests
-
 ## Storage & auth
 
 - **Database:** SQLite, stored under the Syncloud storage dir via FreshRSS's `DATA_PATH`.
-- **Auth:** FreshRSS built-in form login. An `admin` user is provisioned at install; its
-  password is written to `<storage>/admin.password`.
+- **Auth:** Syncloud SSO. nginx gates access with the platform's Authelia `authrequest` and
+  passes the authenticated `Remote-User` to FreshRSS (`auth_type=http_auth`), which
+  auto-provisions the account on first login (`http_auth_auto_register`). No passwords or
+  user management live in the app. FreshRSS's own token-authenticated APIs (Google Reader,
+  Fever) under `/api/` bypass the SSO gate.
 
-FreshRSS's native OIDC support is delegated to Apache `mod_auth_openidc`, which is
-incompatible with this nginx + php-fpm stack, so it is not wired up here. Platform SSO
-integration is a possible future enhancement (forward-auth / `http_auth`).
+## Build & CI
 
-## Build
-
-```
-./build.sh <package-version> <freshrss-version>
-```
-
-Upstream FreshRSS version is pinned as `local version` in `.drone.jsonnet`.
+Upstream FreshRSS is pinned as `local version` in `.drone.jsonnet`. CI builds `amd64`,
+`arm64` and `arm`, tests the bundled nginx/php/cli binaries on `bookworm` and `buster`,
+runs the pytest integration test on both distros, and Playwright UI tests on amd64.

@@ -12,6 +12,9 @@ fi
 BUILD_DIR=${DIR}/../build/snap/freshrss
 mkdir -p ${BUILD_DIR}
 
+apt-get update
+apt-get install -y --no-install-recommends wget ca-certificates
+
 wget --progress=dot:giga -O freshrss.tar.gz \
     https://github.com/FreshRSS/FreshRSS/archive/refs/tags/${VERSION}.tar.gz
 tar xf freshrss.tar.gz --strip-components=1 -C ${BUILD_DIR}

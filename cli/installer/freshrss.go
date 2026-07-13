@@ -1,8 +1,15 @@
 package installer
 
 import (
+	"os"
 	"path"
 )
+
+const customConfig = `<?php
+return [
+	'http_auth_auto_register' => true,
+];
+`
 
 func (i *Installer) InstallFreshRss() error {
 	url, err := i.platformClient.GetAppUrl(App)
@@ -10,36 +17,25 @@ func (i *Installer) InstallFreshRss() error {
 		return err
 	}
 
+	dataPath, err := i.DataPath()
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(path.Join(dataPath, "config.custom.php"), []byte(customConfig), 0644)
+	if err != nil {
+		return err
+	}
+
 	_, err = i.freshRssCli(
 		"./cli/do-install.php",
 		"--default-user", "admin",
-		"--auth-type", "form",
+		"--auth-type", "http_auth",
 		"--environment", "production",
 		"--base-url", url,
 		"--title", "Syncloud",
 		"--db-type", "sqlite",
 		"--api-enabled",
-	)
-	if err != nil {
-		return err
-	}
-
-	storageDir, err := i.platformClient.InitStorage(App, App)
-	if err != nil {
-		return err
-	}
-
-	password, err := getOrCreateUuid(path.Join(storageDir, "admin.password"))
-	if err != nil {
-		return err
-	}
-
-	_, err = i.freshRssCli(
-		"./cli/create-user.php",
-		"--user", "admin",
-		"--password", password,
-		"--api-password", password,
-		"--language", "en",
 	)
 	return err
 }

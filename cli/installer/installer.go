@@ -20,13 +20,15 @@ const (
 )
 
 type Variables struct {
-	App       string
-	AppDir    string
-	DataDir   string
-	CommonDir string
-	DataPath  string
-	Url       string
-	Domain    string
+	App             string
+	AppDir          string
+	DataDir         string
+	CommonDir       string
+	DataPath        string
+	Url             string
+	Domain          string
+	AuthUrl         string
+	AuthLocalSocket string
 }
 
 type Installer struct {
@@ -187,14 +189,21 @@ func (i *Installer) UpdateConfigs() error {
 		return err
 	}
 
+	authUrl, err := i.platformClient.GetAppUrl("auth")
+	if err != nil {
+		return err
+	}
+
 	variables := Variables{
-		App:       App,
-		AppDir:    AppDir,
-		DataDir:   DataDir,
-		CommonDir: CommonDir,
-		DataPath:  dataPath,
-		Url:       url,
-		Domain:    domain,
+		App:             App,
+		AppDir:          AppDir,
+		DataDir:         DataDir,
+		CommonDir:       CommonDir,
+		DataPath:        dataPath,
+		Url:             url,
+		Domain:          domain,
+		AuthUrl:         authUrl,
+		AuthLocalSocket: i.platformClient.GetAuthLocalSocket(),
 	}
 
 	err = config.Generate(

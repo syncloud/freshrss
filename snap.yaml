@@ -21,7 +21,7 @@ apps:
     start-timeout: 600s
 
   cron:
-    command: bin/service.cron.sh
+    command: bin/cron
     daemon: simple
     user: freshrss
     restart-condition: always

@@ -2,18 +2,17 @@ local name = 'freshrss';
 local version = '1.29.1';
 local go = '1.25';
 local nginx = '1.29.3-alpine3.22';
-local python = '3.12-slim-bookworm';
-local publisher_image = 'syncloud/store-publisher:stable-291';
-local platform = '26.04.10';
 local php = '8.3-fpm-bookworm';
+local python = '3.12-slim-bookworm';
+local playwright = 'v1.59.1-jammy';
+local store_publisher = 'stable-291';
+local platform = '26.04.10';
 local distros = ['bookworm', 'buster'];
-local distro_default = 'bookworm';
-local arch = 'amd64';
 
-local platform_image(distro) =
+local platform_image(distro, arch) =
   'syncloud/platform-' + distro + '-' + arch + ':' + platform;
 
-[{
+local build(arch, ui) = [{
   kind: 'pipeline',
   type: 'docker',
   name: arch,
@@ -23,74 +22,72 @@ local platform_image(distro) =
   },
   steps: [
     {
-      name: 'version',
-      image: 'debian:bookworm-slim',
-      commands: [
-        'echo $DRONE_BUILD_NUMBER > version',
-      ],
-    },
-    {
-      name: 'freshrss',
-      image: 'debian:bookworm-slim',
-      commands: [
-        'apt update && apt install -y wget',
-        './freshrss/build.sh ' + version,
-      ],
-    },
-    {
-      name: 'php',
-      image: 'php:' + php,
-      commands: [
-        './php/build.sh',
-      ],
-    },
-    {
       name: 'nginx',
       image: 'nginx:' + nginx,
-      commands: [
-        './nginx/build.sh',
-      ],
+      commands: ['./nginx/build.sh'],
     },
   ] + [
     {
       name: 'nginx test ' + distro,
-      image: platform_image(distro),
+      image: platform_image(distro, arch),
       commands: ['./nginx/test.sh'],
+    }
+    for distro in distros
+  ] + [
+    {
+      name: 'freshrss',
+      image: 'debian:bookworm-slim',
+      commands: ['./freshrss/build.sh ' + version],
+    },
+    {
+      name: 'php',
+      image: 'php:' + php,
+      commands: ['./php/build.sh'],
+    },
+  ] + [
+    {
+      name: 'php test ' + distro,
+      image: platform_image(distro, arch),
+      commands: ['./php/test.sh'],
     }
     for distro in distros
   ] + [
     {
       name: 'cli',
       image: 'golang:' + go,
-      commands: [
-        './cli/build.sh',
-      ],
+      commands: ['./cli/build.sh'],
     },
+  ] + [
+    {
+      name: 'cli test ' + distro,
+      image: platform_image(distro, arch),
+      commands: ['./cli/test.sh'],
+    }
+    for distro in distros
+  ] + [
     {
       name: 'package',
       image: 'debian:bookworm-slim',
-      commands: [
-        'VERSION=$(cat version)',
-        './package.sh ' + name + ' $VERSION',
-      ],
+      commands: ['./package.sh ' + name + ' $DRONE_BUILD_NUMBER'],
     },
+  ] + [
     {
-      name: 'test ' + distro_default,
+      name: 'test ' + distro,
       image: 'python:' + python,
-      commands: [
-        'DOMAIN="' + distro_default + '.com"',
-        'APP_DOMAIN="' + name + '.' + distro_default + '.com"',
-        'getent hosts $APP_DOMAIN | sed "s/$APP_DOMAIN/auth.$DOMAIN/g" | tee -a /etc/hosts',
-        'cat /etc/hosts',
-        'APP_ARCHIVE_PATH=$(realpath $(cat package.name))',
-        'cd test',
-        './deps.sh',
-        'py.test -x -s test.py --distro=' + distro_default + ' --app-archive-path=$APP_ARCHIVE_PATH --app=' + name + ' --arch=' + arch,
-      ],
-    },
+      commands: ['./test/ci-test.sh ' + distro + ' ' + arch],
+    }
+    for distro in distros
+  ] + (if ui then [
+    {
+      name: 'test-ui-' + project,
+      image: 'mcr.microsoft.com/playwright:' + playwright,
+      commands: ['./web/e2e/ci-ui.sh ' + project],
+    }
+    for project in ['desktop', 'mobile']
+  ] else []) + [
     {
       name: 'publish',
-      image: publisher_image,
+      image: 'syncloud/store-publisher:' + store_publisher,
       environment: {
         SYNCLOUD_TOKEN: { from_secret: 'syncloud_token' },
       },
@@ -124,17 +121,23 @@ local platform_image(distro) =
   },
   services: [
     {
-      name: name + '.' + distro_default + '.com',
-      image: platform_image(distro_default),
+      name: name + '.' + distro + '.com',
+      image: platform_image(distro, arch),
       privileged: true,
+      entrypoint: ['/bin/sh', '-c', "mkdir -p /etc/systemd/system/snapd.service.d && printf '[Service]\\nExecStartPost=/bin/sh -c \"/usr/bin/snap set system refresh.hold=2099-01-01T00:00:00Z\"\\n' > /etc/systemd/system/snapd.service.d/disable-refresh.conf && exec /sbin/init"],
       volumes: [
         { name: 'dbus', path: '/var/run/dbus' },
         { name: 'dev', path: '/dev' },
       ],
-    },
+    }
+    for distro in distros
   ],
   volumes: [
     { name: 'dbus', host: { path: '/var/run/dbus' } },
     { name: 'dev', host: { path: '/dev' } },
   ],
-}]
+}];
+
+build('amd64', true) +
+build('arm64', false) +
+build('arm', false)
