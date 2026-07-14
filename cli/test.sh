@@ -3,7 +3,6 @@ DIR=$( cd "$( dirname "$0" )" && pwd )
 BUILD_DIR=${DIR}/../build/snap
 
 ${BUILD_DIR}/bin/cli --help
-${BUILD_DIR}/bin/cron --help > /dev/null 2>&1 || true
 ${BUILD_DIR}/meta/hooks/install --help > /dev/null 2>&1 || true
 ${BUILD_DIR}/meta/hooks/configure --help > /dev/null 2>&1 || true
 ${BUILD_DIR}/meta/hooks/pre-refresh --help > /dev/null 2>&1 || true
