@@ -1,33 +1,12 @@
 package installer
 
 import (
-	"os"
 	"path"
+
+	cp "github.com/otiai10/copy"
 )
 
-const customConfig = `<?php
-return [
-	'http_auth_auto_register' => true,
-];
-`
-
-const customUserConfig = `<?php
-return [
-	'is_admin' => true,
-];
-`
-
-const exampleOpml = `<?xml version="1.0" encoding="UTF-8"?>
-<opml version="2.0">
-	<body>
-		<outline text="Example Feeds" title="Example Feeds">
-			<outline text="FreshRSS" title="FreshRSS" type="rss"
-				xmlUrl="https://github.com/FreshRSS/FreshRSS/releases.atom"
-				htmlUrl="https://freshrss.org/" />
-		</outline>
-	</body>
-</opml>
-`
+var seedFiles = []string{"config.custom.php", "config-user.custom.php", "opml.xml"}
 
 func (i *Installer) InstallFreshRss() error {
 	url, err := i.platformClient.GetAppUrl(App)
@@ -40,19 +19,11 @@ func (i *Installer) InstallFreshRss() error {
 		return err
 	}
 
-	err = os.WriteFile(path.Join(dataPath, "config.custom.php"), []byte(customConfig), 0644)
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(path.Join(dataPath, "config-user.custom.php"), []byte(customUserConfig), 0644)
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(path.Join(dataPath, "opml.xml"), []byte(exampleOpml), 0644)
-	if err != nil {
-		return err
+	for _, f := range seedFiles {
+		err = cp.Copy(path.Join(DataDir, "config", f), path.Join(dataPath, f))
+		if err != nil {
+			return err
+		}
 	}
 
 	_, err = i.freshRssCli(

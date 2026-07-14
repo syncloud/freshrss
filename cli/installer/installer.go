@@ -4,7 +4,6 @@ import (
 	"os"
 	"path"
 
-	"github.com/google/uuid"
 	cp "github.com/otiai10/copy"
 	"github.com/syncloud/golib/config"
 	"github.com/syncloud/golib/linux"
@@ -251,18 +250,4 @@ func (i *Installer) RestorePreStart() error {
 
 func (i *Installer) RestorePostStart() error {
 	return i.Configure()
-}
-
-func getOrCreateUuid(file string) (string, error) {
-	_, err := os.Stat(file)
-	if os.IsNotExist(err) {
-		secret := uuid.New().String()
-		err = os.WriteFile(file, []byte(secret), 0644)
-		return secret, err
-	}
-	content, err := os.ReadFile(file)
-	if err != nil {
-		return "", err
-	}
-	return string(content), nil
 }
