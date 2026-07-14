@@ -18,7 +18,7 @@ const (
 	CommonDir = "/var/snap/freshrss/common"
 )
 
-var seedFiles = []string{"config.custom.php", "config-user.custom.php", "opml.xml"}
+var seedFiles = []string{"config.custom.php", "config-user.custom.php"}
 
 type Variables struct {
 	App             string
