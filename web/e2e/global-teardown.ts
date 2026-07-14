@@ -1,9 +1,10 @@
 import { ssh } from './helpers/ssh'
+import { env } from './helpers/env'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 
-const artifactRoot = process.env.PLAYWRIGHT_ARTIFACT_DIR ?? 'artifact'
-const project = process.env.PLAYWRIGHT_PROJECT ?? 'desktop'
+const artifactRoot = env('PLAYWRIGHT_ARTIFACT_DIR')
+const project = env('PLAYWRIGHT_PROJECT')
 
 function collectArtifacts () {
   const shots = path.join(artifactRoot, `screenshots-${project}`)

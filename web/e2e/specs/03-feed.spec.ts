@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test'
 import { shoot } from '../helpers/screenshot'
 import { loginViaSyncloud } from '../helpers/auth'
-import { ssh } from '../helpers/ssh'
+import { env } from '../helpers/env'
 
-const baseURL = `https://freshrss.${process.env.PLAYWRIGHT_DOMAIN || 'bookworm.com'}`
-const username = process.env.PLAYWRIGHT_USER || 'user'
-const password = process.env.PLAYWRIGHT_PASSWORD || 'Password1'
+const baseURL = `https://freshrss.${env('PLAYWRIGHT_DOMAIN')}`
+const username = env('PLAYWRIGHT_USER')
+const password = env('PLAYWRIGHT_PASSWORD')
 
 test('feed', async ({ page }, info) => {
   test.skip(info.project.name !== 'desktop', 'feed sidebar is desktop-only in this smoke test')
@@ -15,8 +15,9 @@ test('feed', async ({ page }, info) => {
   // the example feed seeded at install (DATA_PATH/opml.xml) shows in the sidebar tree
   await expect(page.locator('#sidebar').getByText('Example Feeds')).toBeVisible({ timeout: 20_000 })
 
-  // fetch the feed, then the reader should show real articles
-  ssh('sudo -u freshrss /snap/freshrss/current/bin/freshrss.sh ./app/actualize_script.php 2>&1 | tail -3', { throw: false })
+  // refresh feeds the way a user does — the header actualize button — then read the articles
+  await page.locator('#actualize').click()
+  await page.waitForLoadState('networkidle').catch(() => {})
 
   await expect(async () => {
     await page.goto(baseURL)

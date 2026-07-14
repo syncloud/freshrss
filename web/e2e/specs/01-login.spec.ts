@@ -1,10 +1,11 @@
 import { test, expect } from '@playwright/test'
 import { shoot } from '../helpers/screenshot'
 import { loginViaSyncloud } from '../helpers/auth'
+import { env } from '../helpers/env'
 
-const baseURL = `https://freshrss.${process.env.PLAYWRIGHT_DOMAIN || 'bookworm.com'}`
-const username = process.env.PLAYWRIGHT_USER || 'user'
-const password = process.env.PLAYWRIGHT_PASSWORD || 'Password1'
+const baseURL = `https://freshrss.${env('PLAYWRIGHT_DOMAIN')}`
+const username = env('PLAYWRIGHT_USER')
+const password = env('PLAYWRIGHT_PASSWORD')
 
 test('login', async ({ page }, info) => {
   await loginViaSyncloud(page, baseURL, username, password, info)
