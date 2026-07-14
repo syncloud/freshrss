@@ -139,5 +139,5 @@ local build(arch, ui) = [{
 }];
 
 build('amd64', true) +
-build('arm64', false) +
-build('arm', false)
+build('arm64', false)
+// build('arm', false)  // re-enable when the armhf runner is back

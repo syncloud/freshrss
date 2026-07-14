@@ -11,6 +11,12 @@ return [
 ];
 `
 
+const customUserConfig = `<?php
+return [
+	'is_admin' => true,
+];
+`
+
 func (i *Installer) InstallFreshRss() error {
 	url, err := i.platformClient.GetAppUrl(App)
 	if err != nil {
@@ -23,6 +29,11 @@ func (i *Installer) InstallFreshRss() error {
 	}
 
 	err = os.WriteFile(path.Join(dataPath, "config.custom.php"), []byte(customConfig), 0644)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(path.Join(dataPath, "config-user.custom.php"), []byte(customUserConfig), 0644)
 	if err != nil {
 		return err
 	}
