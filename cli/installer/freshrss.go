@@ -17,6 +17,18 @@ return [
 ];
 `
 
+const exampleOpml = `<?xml version="1.0" encoding="UTF-8"?>
+<opml version="2.0">
+	<body>
+		<outline text="Example Feeds" title="Example Feeds">
+			<outline text="FreshRSS" title="FreshRSS" type="rss"
+				xmlUrl="https://github.com/FreshRSS/FreshRSS/releases.atom"
+				htmlUrl="https://freshrss.org/" />
+		</outline>
+	</body>
+</opml>
+`
+
 func (i *Installer) InstallFreshRss() error {
 	url, err := i.platformClient.GetAppUrl(App)
 	if err != nil {
@@ -34,6 +46,11 @@ func (i *Installer) InstallFreshRss() error {
 	}
 
 	err = os.WriteFile(path.Join(dataPath, "config-user.custom.php"), []byte(customUserConfig), 0644)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(path.Join(dataPath, "opml.xml"), []byte(exampleOpml), 0644)
 	if err != nil {
 		return err
 	}
