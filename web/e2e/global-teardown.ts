@@ -14,19 +14,27 @@ function collectArtifacts () {
   const resultsDir = 'test-results'
   if (!fs.existsSync(resultsDir)) return
 
+  const uniq = (dst: string): string => {
+    let out = dst
+    let i = 1
+    while (fs.existsSync(out)) {
+      out = dst.replace(/(\.[^.]+)$/, `-${i}$1`)
+      i++
+    }
+    return out
+  }
+
   for (const name of fs.readdirSync(resultsDir)) {
     const dir = path.join(resultsDir, name)
     if (!fs.statSync(dir).isDirectory()) continue
 
-    const pngs = fs.readdirSync(dir).filter((f) => f.endsWith('.png')).sort()
-    pngs.forEach((png, i) => {
-      const suffix = i === 0 ? '' : `-${i}`
-      fs.copyFileSync(path.join(dir, png), path.join(shots, `${name}${suffix}.png`))
-    })
+    for (const png of fs.readdirSync(dir).filter((f) => f.endsWith('.png')).sort()) {
+      fs.copyFileSync(path.join(dir, png), uniq(path.join(shots, png)))
+    }
 
     const video = path.join(dir, 'video.webm')
     if (fs.existsSync(video)) {
-      fs.copyFileSync(video, path.join(videos, `${name}.webm`))
+      fs.copyFileSync(video, uniq(path.join(videos, `${name.split('-').slice(0, 2).join('-')}.webm`)))
     }
   }
 }

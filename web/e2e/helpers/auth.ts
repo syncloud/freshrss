@@ -14,7 +14,7 @@ export async function loginViaSyncloud (
 ) {
   await page.goto(baseURL)
   await page.waitForLoadState('networkidle').catch(() => {})
-  if (info) await shoot(page, info, 'login-00-landing')
+  if (info) await shoot(page, info, 'landing')
 
   if (!onAuthHost(page)) {
     const signIn = page
@@ -38,7 +38,7 @@ export async function loginViaSyncloud (
     await page.locator(userSel).first().waitFor({ state: 'visible', timeout: 20_000 })
     await page.locator(userSel).first().fill(username)
     await page.locator(passSel).first().fill(password)
-    if (info) await shoot(page, info, 'login-01-authelia')
+    if (info) await shoot(page, info, 'auth')
     await Promise.all([
       page.waitForURL((url) => !new URL(url.toString()).host.startsWith('auth.'), { timeout: 30_000 }).catch(() => {}),
       page.locator(submitSel).first().click()
