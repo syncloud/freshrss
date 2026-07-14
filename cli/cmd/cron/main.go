@@ -18,7 +18,7 @@ func main() {
 	for {
 		time.Sleep(interval)
 		logger.Info("refreshing feeds")
-		cmd := exec.Command(refresh, "./cli/actualize-script.php")
+		cmd := exec.Command(refresh, "./app/actualize_script.php")
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		if err := cmd.Run(); err != nil {
