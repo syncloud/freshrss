@@ -23,6 +23,6 @@ test('feed', async ({ page }, info) => {
   // it is now subscribed — open subscription management from the reader and see it listed
   await page.goto(baseURL)
   await page.locator('#btn-subscription').click()
-  await expect(page.locator('.box').getByRole('link', { name: /freshrss/i }).first()).toBeVisible({ timeout: 20_000 })
+  await expect(page.getByText(/FreshRSS releases/i)).toBeVisible({ timeout: 20_000 })
   await shoot(page, info, 'feed')
 })
