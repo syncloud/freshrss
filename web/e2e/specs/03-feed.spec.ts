@@ -13,19 +13,16 @@ test('feed', async ({ page }, info) => {
 
   await loginViaSyncloud(page, baseURL, username, password, info)
 
-  // add a feed the way a user does on an empty system: + button, paste a URL, submit
   await page.locator('#btn-add').click()
   await page.locator('#url_rss').fill(feedUrl)
   await page.locator('#add_rss button[type="submit"]').first().click()
   await page.waitForLoadState('networkidle').catch(() => {})
 
-  // read the feed: adding it fetched its articles (state=3 shows read + unread)
   await page.goto(`${baseURL}/i/?state=3`)
   const article = page.locator('#stream .flux').first()
   await expect(article).toBeVisible({ timeout: 30_000 })
   await shoot(page, info, 'articles')
 
-  // open an article and read its content
   await article.locator('.summary').first().click()
   await expect(article.locator('.flux_content').first()).toBeVisible({ timeout: 10_000 })
   await shoot(page, info, 'article')
