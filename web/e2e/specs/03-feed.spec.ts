@@ -9,7 +9,7 @@ const password = env('PLAYWRIGHT_PASSWORD')
 const feedUrl = 'https://github.com/FreshRSS/FreshRSS/releases.atom'
 
 test('feed', async ({ page }, info) => {
-  test.skip(info.project.name !== 'desktop', 'feed management is desktop-only in this smoke test')
+  test.skip(info.project.name !== 'desktop', 'feed reading is desktop-only in this smoke test')
 
   await loginViaSyncloud(page, baseURL, username, password, info)
 
@@ -18,11 +18,15 @@ test('feed', async ({ page }, info) => {
   await page.locator('#url_rss').fill(feedUrl)
   await page.locator('#add_rss button[type="submit"]').first().click()
   await page.waitForLoadState('networkidle').catch(() => {})
-  await shoot(page, info, 'added')
 
-  // it is now subscribed — open subscription management from the reader and see it listed
-  await page.goto(baseURL)
-  await page.locator('#btn-subscription').click()
-  await expect(page.getByText(/FreshRSS releases/i)).toBeVisible({ timeout: 20_000 })
-  await shoot(page, info, 'feed')
+  // read the feed: adding it fetched its articles (state=3 shows read + unread)
+  await page.goto(`${baseURL}/i/?state=3`)
+  const article = page.locator('#stream .flux').first()
+  await expect(article).toBeVisible({ timeout: 30_000 })
+  await shoot(page, info, 'articles')
+
+  // open an article and read its content
+  await article.locator('.summary').first().click()
+  await expect(article.locator('.flux_content').first()).toBeVisible({ timeout: 10_000 })
+  await shoot(page, info, 'article')
 })
