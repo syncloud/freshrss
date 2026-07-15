@@ -6,7 +6,7 @@ import { env } from '../helpers/env'
 const baseURL = `https://freshrss.${env('PLAYWRIGHT_DOMAIN')}`
 const username = env('PLAYWRIGHT_USER')
 const password = env('PLAYWRIGHT_PASSWORD')
-const feedUrl = 'https://www.freshrss.org/feeds/all.atom.xml'
+const feedUrl = 'https://lwn.net/headlines/rss'
 
 test('feed', async ({ page }, info) => {
   test.skip(info.project.name !== 'desktop', 'feed reading is desktop-only in this smoke test')
@@ -23,7 +23,7 @@ test('feed', async ({ page }, info) => {
   await expect(article).toBeVisible({ timeout: 30_000 })
   await shoot(page, info, 'articles')
 
-  await article.locator('.summary').first().click()
+  await article.locator('.title').first().click()
   await expect(article.locator('.flux_content').first()).toBeVisible({ timeout: 10_000 })
   await shoot(page, info, 'article')
 })
