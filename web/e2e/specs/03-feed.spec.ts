@@ -6,7 +6,7 @@ import { env } from '../helpers/env'
 const baseURL = `https://freshrss.${env('PLAYWRIGHT_DOMAIN')}`
 const username = env('PLAYWRIGHT_USER')
 const password = env('PLAYWRIGHT_PASSWORD')
-const feedUrl = 'https://github.com/FreshRSS/FreshRSS/releases.atom'
+const feedUrl = 'https://www.freshrss.org/feeds/all.atom.xml'
 
 test('feed', async ({ page }, info) => {
   test.skip(info.project.name !== 'desktop', 'feed reading is desktop-only in this smoke test')
