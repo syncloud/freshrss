@@ -1,0 +1,6 @@
+build
+artifact
+package.name
+*.snap
+.idea
+__pycache__
