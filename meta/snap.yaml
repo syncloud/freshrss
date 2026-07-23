@@ -1,6 +1,6 @@
 name: freshrss
 summary: FreshRSS
-description: A free, self-hostable RSS and Atom feed aggregator
+description: RSS and Atom feed aggregator
 grade: stable
 
 apps:
