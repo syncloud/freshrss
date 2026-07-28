@@ -5,7 +5,7 @@ local nginx = '1.29.3-alpine3.22';
 local php = '8.3-fpm-bookworm';
 local python = '3.12-slim-bookworm';
 local playwright = 'v1.59.1-jammy';
-local store_publisher = 'stable-291';
+local store_publisher = 'stable-346';
 local platform = '26.04.10';
 local distros = ['bookworm', 'buster'];
 
